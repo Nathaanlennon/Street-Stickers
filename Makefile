@@ -1,5 +1,5 @@
 # Nom du programme
-TARGET = Mysterus_adventure
+TARGET = Street_Stickers
 
 # Compilateur
 CC = gcc
@@ -8,7 +8,7 @@ CC = gcc
 CFLAGS = -Wall -Wextra
 
 # Liste des fichiers source
-SOURCES =test.c usual.c game.c
+SOURCES =main.c usual.c game.c
 
 # Liste des fichiers objets correspondant aux fichiers source
 OBJECTS = $(SOURCES:.c=.o)

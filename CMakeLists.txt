@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.8)
-project(myster-us-adventures C)
+project(street-stickers C)
 
 set(CMAKE_C_STANDARD 11)
 # Common functions
@@ -16,7 +16,7 @@ if (MSVC)
 endif ()
 add_subdirectory(external/rgr)
 
-add_executable(myster-us-adventures
+add_executable(street-stickers
         usual.c test.c)
-target_link_libraries(myster-us-adventures GameRGR2)
-target_include_directories(myster-us-adventures PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_link_libraries(street-stickers GameRGR2)
+target_include_directories(street-stickers PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)

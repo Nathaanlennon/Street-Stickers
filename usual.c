@@ -2,18 +2,19 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <poll.h>
+#include <unistd.h>
 #include <stdarg.h>
-#include "external/rgr/inc/libGameRGR2.h"
-#include "macro.h"
-#include "struct.h"
-#include "usual.h"
+#include <time.h>
+#include <fcntl.h>
+#include <errno.h>
+#include "include/macro.h"
+#include "include/struct.h"
+#include "include/usual.h"
 
 // efface tout le terminal visible
-void clear_all(Data* d) {
-    erase();
-    d->cursor.y =0;
-    d->cursor.x=0;
-
+void clear_all(){
+    printf("\033[0;0H\033[J");
 }
 
 //efface une partie du terminal
@@ -27,22 +28,43 @@ void cursor_move(char direction, int num) {
     printf("\033[%d%c", num, direction);
 }
 
-// Va vider le "buffer" pour éviter les fuites de donnée quand on fait des getchar notamment
-void flush_input_buffer() {
-    int c;
-    char *str = malloc(sizeof(char) * 10); //copie le contenu du buffer dans un tableau
-
-    //vérifie que le buffer n'est pas vide
-    if (strlen(str) != 0) {
-        while ((c = getchar()) != '\n' && c != EOF);
+/* 0: success -1: error */
+int setBlockingFD(int fileDescriptor, int blocking){
+    int r=fcntl(fileDescriptor,F_GETFL);
+    if(r==-1){
+        perror("fcntl(F_GETFL)");
+        return -1;
     }
-    free(str);
+    int flags=(blocking ? r & ~O_NONBLOCK : r | O_NONBLOCK);
+    r=fcntl(fileDescriptor,F_SETFL,flags);
+    if(r==-1){
+        perror("fcntl(F_SETFL)");
+        return -1;
+    }
+    return 0;
+}
+
+void discardInput(void){
+    setBlockingFD(STDIN_FILENO, 0);
+    for(;;){
+        int c=fgetc(stdin);
+        if(c==EOF){
+            if(errno==EAGAIN){
+                //vide
+            }
+            break;
+        }
+        else{
+            //pas vide
+        }
+    }
+    setBlockingFD(STDIN_FILENO, 1);
 }
 
 // retourne un simple int d'un seul caractère, utile pour les cas de choix pour par exemple de 1 à 5, moins
 // d'utilisations de ressources qu'un scanf
 int getint() {
-    return getchar() - '0'; // ascii du chiffre transformé en le chiffre lui meme en lui enlevant le code de 0
+    return (getchar() - '0'); // ascii du chiffre transformé en le chiffre lui meme en lui enlevant le code de 0
 }
 
 // permet d'écrire un "commentaire" d'une couleur differente et de remettre à la bonne couleur pour la suite
@@ -53,9 +75,9 @@ void commentary(char tab[]) { // tab est la chaine de caractère désiré en com
 
 // permet de faire un "entrer pour continuer", "presser une touche pour continuer"
 void waiting() {
-    commentary("(Press 'enter' to continue..)");
+    commentary("(Appuyez sur Entrée pour continuer..)");
     getchar();
-    flush_input_buffer(); // efface la mémoire tampon pour éviter les fuites de mémoire d'input
+    discardInput();
 }
 
 //permet de créer un fichier de rapport de crash si il y en a un
@@ -77,76 +99,52 @@ void write_crash_report(const char* error_message) {
     printf("Le rapport de crash a été créé : %s\n", filename);
 }
 
-void set_color(Data *data, char *code) {
-    if (code[0] == '3') {
-        data->cursor.color = code[1] - '0';
-    } else if (code[0] == '4') {
-        data->cursor.background = code[1] - '0';
+// Cherche l'indice du symbole de la case dans un tableau spécifié, renvoie l'indice de la première occurrence du symbole dans le tableau, sinon renvoie -1
+int SymbolIdInArray(Square square, const Entity array[], int size){
+    for(int i = 0; i<size; i++){
+        if(strcmp(square.symbol.name, array[i].name) == 0)
+            return i; // retourne le premier indice correspondant si trouvé dans le tableau
     }
+    return -1; //si pas dans le tableau
 }
 
-short get_color_pair(Data *data) {
-    if (data->colors.color_num==0){
-        data->colors.colors_pair[0][0] = data->cursor.color;
-        data->colors.colors_pair[0][1]= data->cursor.background;
-        init_pair(8, data->cursor.color, data->cursor.background);
-
-        data->colors.color_num ++;
-        return 1;
-    }
-    for (int i = 0; i < data->colors.color_num; i++) {
-        if (data->colors.colors_pair[i][0] == data->cursor.color && data->colors.colors_pair[i][1]== data->cursor.background){
-            return i+8;
+//crée un background noir pour éviter les problemes de terminal pas noir car on utiliser des couleurs spécifiques
+void background(int i, int j) {
+    for (int k = 0; k < i; k++) {
+        for (int l = 0; l < j; l++) {
+            printf("%s ", B_BLK);
         }
+        printf("\n");
     }
-    data->colors.colors_pair[data->colors.color_num][0] = data->cursor.color;
-    data->colors.colors_pair[data->colors.color_num][1]= data->cursor.background;
-    init_pair(data->colors.color_num+8, data->cursor.color, data->cursor.background);
-    data->colors.color_num++;
-    return data->colors.color_num+8;
-
+    cursor_move('A', 10);
+    clear_all();
 }
 
-void draw_printf(Data *data, const char *format, ...) {
-    va_list args;
-    va_start(args, format);
-
-    char buffer[200];
-    char ansi[2];
-    int j = 0;
-    vsnprintf(buffer, sizeof(buffer), format, args);
-    char *str = malloc(strlen(buffer));
-    for (int i = 0; i < strlen(buffer); i++) {
-        if (buffer[i] == '\033') {
-            drawText(data->screen, data->cursor.x, data->cursor.y, str, get_color_pair(data));
-            ansi[0] = buffer[i + 2];
-            ansi[1] = buffer[i + 3];
-            set_color(data, ansi);
-            data->cursor.x += strlen(str);
-            free(str);
-            str = malloc(strlen(buffer));
-            j = 0;
-            i += 4;
-        } else if (buffer[i] == '\n') {
-            drawText(data->screen, data->cursor.x, data->cursor.y, str, get_color_pair(data));
-            free(str);
-            str = malloc(strlen(buffer));
-            j = 0;
-            data->cursor.x = 0;
-            data->cursor.y += 1;
-        } else {
-            str[j] = buffer[i];
-            j++;
-        }
-    }
-    drawText(data->screen, data->cursor.x, data->cursor.y, str, get_color_pair(data));
-    data->cursor.x += strlen(str);
-
-    free(str);
-    va_end(args);
+//Vérifie si la case entrée est déjà retournée, ou est le bord de la map, ou est une case de départ. Renvoie 1 si elle est l'une de ces conditions, 0 sinon.
+int CheckSquareInvalid(Square square) {
+    return (square.flipped == 1 || strcmp(square.symbol.name, " ") == 0 || strcmp(square.symbol.name, START) == 0);
 }
 
-void curses_scanf(){
-
+//Vérifie si l'index spécifié est valide pour être recherché dans un tableau. Renvoie 1 si hors du tableau, 0 sinon.
+int CheckIndexOutOfArray(int i, int arraySize){
+    return (i < 0 || i >= arraySize);
 }
-void
+
+//récupère le temps depuis le 1er janvier 1970 à 00:00:00 UTC
+long get_time(){
+    return time(NULL);
+}
+
+//compare le temps entre t1 et t2 pour retourner combien de temps est passé entre les deux
+int compare_time(long t1, long t2){
+    return (int)(t2-t1);
+}
+
+//transforme le nombre de secondes en heure minute seconde et le print
+void format_time(int seconds) {
+    int hours = seconds / 3600;
+    int minutes = (seconds % 3600) / 60;
+    int remaining_seconds = (seconds % 3600) % 60;
+
+    printf("%d heures, %d minutes et %d secondes\n", hours, minutes, remaining_seconds);
+}

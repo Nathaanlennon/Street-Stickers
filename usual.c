@@ -80,34 +80,6 @@ void waiting() {
     discardInput();
 }
 
-//permet de créer un fichier de rapport de crash si il y en a un
-void write_crash_report(const char* error_message) {
-    time_t current_time = time(NULL); //la fonction time renvoie nombre de secondes écoulées depuis le 01/01/1970 00:00:00
-    struct tm* time = localtime(&current_time); //conversion du timestamp précédent en date lisible selon le fuseau horaire local
-    char filename[50];
-    strftime(filename, sizeof(filename), "%Y-%m-%d_%H-%M-%S_crash_report.txt", time); //formatage du nom de fichier en année-mois-jour_heure-min-sec
-
-    FILE* file = fopen(filename, "w");
-    if (file == NULL) {
-        printf("Erreur lors de la création du rapport de crash.\n");
-    }
-
-    fprintf(file, "Date et heure du crash : %s", asctime(time));
-    fprintf(file, "Message d'erreur : %s\n", error_message);
-
-    fclose(file);
-    printf("Le rapport de crash a été créé : %s\n", filename);
-}
-
-// Cherche l'indice du symbole de la case dans un tableau spécifié, renvoie l'indice de la première occurrence du symbole dans le tableau, sinon renvoie -1
-int SymbolIdInArray(Square square, const Entity array[], int size){
-    for(int i = 0; i<size; i++){
-        if(strcmp(square.symbol.name, array[i].name) == 0)
-            return i; // retourne le premier indice correspondant si trouvé dans le tableau
-    }
-    return -1; //si pas dans le tableau
-}
-
 //crée un background noir pour éviter les problemes de terminal pas noir car on utiliser des couleurs spécifiques
 void background(int i, int j) {
     for (int k = 0; k < i; k++) {
@@ -120,10 +92,6 @@ void background(int i, int j) {
     clear_all();
 }
 
-//Vérifie si la case entrée est déjà retournée, ou est le bord de la map, ou est une case de départ. Renvoie 1 si elle est l'une de ces conditions, 0 sinon.
-int CheckSquareInvalid(Square square) {
-    return (square.flipped == 1 || strcmp(square.symbol.name, " ") == 0 || strcmp(square.symbol.name, START) == 0);
-}
 
 //Vérifie si l'index spécifié est valide pour être recherché dans un tableau. Renvoie 1 si hors du tableau, 0 sinon.
 int CheckIndexOutOfArray(int i, int arraySize){

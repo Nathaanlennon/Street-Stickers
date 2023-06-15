@@ -3,14 +3,11 @@
 #include <string.h>
 #include "macro.h"
 #include "usual.h"
+#include "include/struct.h"
 #include "struct.h"
 #include "external/rgr/inc/libGameRGR2.h"
 #include "game.h"
 
-//change de scène quand appelé
-void scene_changer(Data *data, Scene scene){
-    data->scene_type = scene;
-}
 
 void init(void* pUserData, Screen* pScreen){
     Data* d = pUserData;

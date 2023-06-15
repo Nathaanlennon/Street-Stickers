@@ -5,7 +5,7 @@
 #include <stdarg.h>
 #include "external/rgr/inc/libGameRGR2.h"
 #include "macro.h"
-#include "struct.h"
+#include "include/struct.h"
 #include "usual.h"
 
 

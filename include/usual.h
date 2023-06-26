@@ -2,8 +2,8 @@
 // Created by cacac on 12/05/2023.
 //
 
-#ifndef STREET_STICKERS_H
-#define STREET_STICKERS_H
+#ifndef STREET_STICKERS_USUAL_H
+#define STREET_STICKERS_USUAL_H
 #include <stdio.h>
 #include "struct.h"
 void clear_all();
@@ -19,4 +19,5 @@ int CheckIndexOutOfArray(int i, int arraySize);
 long get_time();
 int compare_time(long t1, long t2);
 void format_time(int seconds);
-#endif //STREET_STICKERS_H
+void draw_sprite(Screen* screen, int x, int y, char* sprite, int color_pair);
+#endif //STREET_STICKERS_USUAL_H

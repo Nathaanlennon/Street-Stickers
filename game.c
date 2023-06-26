@@ -9,7 +9,7 @@
 #include "usual.h"
 
 
-void launch_game(Data* data) {
-    data->scene_type = GAME;
-}
+/*void launch_game(Data* data) {
+
+}*/
 

@@ -6,5 +6,5 @@
 #define STREET_STICKERS_GAME_H
 #include <stdio.h>
 #include "struct.h"
-void launch_game(Data* data);
+//void launch_game(Data* data);
 #endif //STREET_STICKERS_GAME_H

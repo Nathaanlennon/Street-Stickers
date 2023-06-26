@@ -116,3 +116,25 @@ void format_time(int seconds) {
 
     printf("%d heures, %d minutes et %d secondes\n", hours, minutes, remaining_seconds);
 }
+
+void draw_sprite(Screen* screen, int x, int y, char* sprite, int color_pair){ //coordinates of the center of the sprite (the body)
+    char* part = malloc(5);
+    int part_y = y-1;
+    int j=0;
+    int size = strlen(sprite);
+    for (int i=0;i<size;i++){
+        if (sprite[i] == '\n'){
+            drawText(screen,x-1, part_y, part, color_pair);
+            part_y++;
+            for (int k = 0; k<j;k++){
+                part[k] = 0;
+            }
+            j=0;
+        }
+        else{
+            part[j] = sprite[i];
+            j++;
+        }
+    }
+
+}

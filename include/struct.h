@@ -28,8 +28,10 @@ typedef struct {
     int pv;
     enum sprite posture; //(0 base ; 1 parade ; 2 attack f1 ; 3 attack f2)
     int x;
-    int init_parade_time;
-    double parade_time;
+    float init_parade_time;
+    float parade_time;
+    float init_attack_time;
+    float attack_time;
 }Player;
 typedef struct Data {
     Screen *screen;

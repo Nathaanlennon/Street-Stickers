@@ -13,7 +13,7 @@
 #include "include/usual.h"
 
 // efface tout le terminal visible
-void clear_all(){
+void clear_all() {
     printf("\033[0;0H\033[J");
 }
 
@@ -29,32 +29,31 @@ void cursor_move(char direction, int num) {
 }
 
 /* 0: success -1: error */
-int setBlockingFD(int fileDescriptor, int blocking){
-    int r=fcntl(fileDescriptor,F_GETFL);
-    if(r==-1){
+int setBlockingFD(int fileDescriptor, int blocking) {
+    int r = fcntl(fileDescriptor, F_GETFL);
+    if (r == -1) {
         perror("fcntl(F_GETFL)");
         return -1;
     }
-    int flags=(blocking ? r & ~O_NONBLOCK : r | O_NONBLOCK);
-    r=fcntl(fileDescriptor,F_SETFL,flags);
-    if(r==-1){
+    int flags = (blocking ? r & ~O_NONBLOCK : r | O_NONBLOCK);
+    r = fcntl(fileDescriptor, F_SETFL, flags);
+    if (r == -1) {
         perror("fcntl(F_SETFL)");
         return -1;
     }
     return 0;
 }
 
-void discardInput(void){
+void discardInput(void) {
     setBlockingFD(STDIN_FILENO, 0);
-    for(;;){
-        int c=fgetc(stdin);
-        if(c==EOF){
-            if(errno==EAGAIN){
+    for (;;) {
+        int c = fgetc(stdin);
+        if (c == EOF) {
+            if (errno == EAGAIN) {
                 //vide
             }
             break;
-        }
-        else{
+        } else {
             //pas vide
         }
     }
@@ -94,18 +93,18 @@ void background(int i, int j) {
 
 
 //Vérifie si l'index spécifié est valide pour être recherché dans un tableau. Renvoie 1 si hors du tableau, 0 sinon.
-int CheckIndexOutOfArray(int i, int arraySize){
+int CheckIndexOutOfArray(int i, int arraySize) {
     return (i < 0 || i >= arraySize);
 }
 
 //récupère le temps depuis le 1er janvier 1970 à 00:00:00 UTC
-long get_time(){
+long get_time() {
     return time(NULL);
 }
 
 //compare le temps entre t1 et t2 pour retourner combien de temps est passé entre les deux
-int compare_time(long t1, long t2){
-    return (int)(t2-t1);
+int compare_time(long t1, long t2) {
+    return (int) (t2 - t1);
 }
 
 //transforme le nombre de secondes en heure minute seconde et le print
@@ -117,24 +116,38 @@ void format_time(int seconds) {
     printf("%d heures, %d minutes et %d secondes\n", hours, minutes, remaining_seconds);
 }
 
-void draw_sprite(Screen* screen, int x, int y, char* sprite, int color_pair){ //coordinates of the center of the sprite (the body)
-    char* part = malloc(5);
-    int part_y = y-1;
-    int j=0;
-    int size = strlen(sprite);
-    for (int i=0;i<size;i++){
-        if (sprite[i] == '\n'){
-            drawText(screen,x-1, part_y, part, color_pair);
-            part_y++;
-            for (int k = 0; k<j;k++){
-                part[k] = 0;
+void draw_sprite(Screen *screen, int x, int y, char *sprite,int color_pair) { //coordinates of the center of the sprite (the body)
+    char *part = malloc(6);
+    int part_x = x - 2;
+    int part_y = y - 1;
+    int j = 0;
+    //int size = strlen(sprite);
+    for (int i = 0; i < 21; i++) {
+        if (sprite[i] == ' ') {
+            drawText(screen, part_x, part_y, part, color_pair);
+            part_x += j+1;
+            if (j > 0) {
+                for (int k = 0; k < j; k++) {
+                    part[k] = 0;
+                }
+                j = 0;
             }
-            j=0;
-        }
-        else{
+        } else if (sprite[i] == '\n') {
+            drawText(screen, part_x, part_y, part, color_pair);
+            part_x = x - 2;
+            part_y++;
+            if (j > 0) {
+                for (int k = 0; k < j; k++) {
+                    part[k] = 0;
+                }
+                j = 0;
+            }
+        } else {
             part[j] = sprite[i];
             j++;
         }
     }
 
 }
+
+

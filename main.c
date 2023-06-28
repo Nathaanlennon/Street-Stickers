@@ -108,16 +108,16 @@ void draw(void* pUserData, Screen* pScreen){
     clear();
     switch (d->p1.posture) {
         case BASE:
-            draw_sprite(d->screen,d->p1.x, 10, " o \n/|\\\n/ \\\n",8);
+            draw_sprite(d->screen,d->p1.x, 10, "   o  \n  /|\\ \n  / \\ \n",8);
             break;
         case PARADE:
-            draw_sprite(d->screen,d->p1.x, 10, " o \n/|\\|\n/ \\\n",8);
+            draw_sprite(d->screen,d->p1.x, 10, "   o  \n  /|\\|\n  / \\ \n",8);
             break;
         case ATTACK_F1:
-            draw_sprite(d->screen,d->p1.x, 10, " o \n/|\\/\n/ \\\n",8);
+            draw_sprite(d->screen,d->p1.x, 10, "   o  \n  /|\\/\n  / \\ \n",8);
             break;
         case ATTACK_F2:
-            draw_sprite(d->screen,d->p1.x, 10, " o__\n/|\n/ \\\n",8);
+            draw_sprite(d->screen,d->p1.x, 10, "   o__\n  /|  \n  / \\ \n",8);
             break;
     }
 

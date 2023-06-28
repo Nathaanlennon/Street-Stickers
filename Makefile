@@ -5,7 +5,7 @@ TARGET = Street_Stickers
 CC = gcc
 
 # Options de compilation
-CFLAGS = -Wall -Wextra
+CFLAGS = -Wall -Wextra -g
 
 # Liste des fichiers source
 SOURCES =main.c usual.c game.c
